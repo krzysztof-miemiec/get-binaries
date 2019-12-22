@@ -10,9 +10,13 @@ files from `tar.gz` and `zip` archives. It accepts the following arguments:
 | `--copy` | - | Copies downloaded binaries to global location |
 | `-g` or `--global-bin-dir` | `/usr/local/bin` | Sets global binary location |
 | `-f` or `--file` | `.binaries` | Sets a file with binary definitions |
-| `--upgrade` | - | Upgrades `get-binaries.sh` script to a new version
+| `--upgrade` | - | Upgrades `get-binaries.sh` script to a new version |
 
-Check [.binaries](examples/.binaries) file for syntax sample. Use `{version}` and `{platform}` variables in URL.
+Check [.binaries](examples/usage-with-file/.binaries) file for syntax sample. Use `{version}` and `{platform}` variables in URL.
+
+Platform variable replacement can be done by:
+- passing additional parameters like `--linux=lin` or `--darwin=osx` to `gb_fetch` (when you specify it manually)
+- passing additional part in `.binaries` file like `linux=lin` or `darwin-osx` (when you specify binaries in file)
 
 ## Setup
 

@@ -3,7 +3,7 @@ set -e
 
 for i in "$@"; do
   case $i in
-  --copy|--copy=true)
+  --copy | --copy=true)
     COPY=yes
     shift
     ;;
@@ -14,16 +14,16 @@ for i in "$@"; do
     UPGRADE=latest
     shift
     ;;
-  -g=*|--global-bin-dir=*)
+  -g=* | --global-bin-dir=*)
     GLOBAL_BIN_DIR="${i#*=}"
     shift
     ;;
-  -f=*|--file=*)
+  -f=* | --file=*)
     BINARIES_FILE="${i#*=}"
     shift
     ;;
-  *)
-    ;;
+  *) ;;
+
   esac
 done
 
@@ -51,7 +51,7 @@ function gb_checksum_sha256() {
   echo "${SHA%% *}"
 }
 
-function gb_lockfile_check {
+function gb_lockfile_check() {
   local NAME=$1
   local CHECKSUM=$2
   if [[ -z "$BINARIES_FILE" ]]; then
@@ -87,12 +87,45 @@ function gb_filesize() {
 }
 
 function gb_fetch() {
-  local NAME=$1
-  local VERSION=$2
-  local URL=$4
+  local NAME
+  local VERSION
+  local URL
+  local DARWIN_PLATFORM=darwin
+  local LINUX_PLATFORM=linux
+  for p in "$@"; do
+    case $p in
+    --version=*)
+      local VERSION="${p#*=}"
+      shift
+      ;;
+    --name=*)
+      local NAME="${p#*=}"
+      shift
+      ;;
+    --url=*)
+      URL="${p#*=}"
+      shift
+      ;;
+    --darwin=*)
+      DARWIN_PLATFORM="${p#*=}"
+      shift
+      ;;
+    --linux=*)
+      LINUX_PLATFORM="${p#*=}"
+      shift
+      ;;
+    *) ;;
+    esac
+  done
 
-  local URL=${URL//\{version\}/${VERSION}}
-  local URL=${URL//\{platform\}/${PLATFORM}}
+  local URL_PLATFORM
+  case "$PLATFORM" in
+  darwin) URL_PLATFORM="$DARWIN_PLATFORM" ;;
+  linux) URL_PLATFORM="$LINUX_PLATFORM" ;;
+  esac
+
+  URL=${URL//\{version\}/${VERSION}}
+  URL=${URL//\{platform\}/${URL_PLATFORM}}
   local FILE="${BIN_DIR}/${NAME}"
   local TMP_FILE="${FILE}.tmp"
   local CHECKSUM
@@ -126,7 +159,7 @@ function gb_fetch() {
   fi
 }
 
-function gb_summary {
+function gb_summary() {
   echo ""
   echo "Fetched binaries live in ${BIN_DIR} now."
   if [[ -z "$COPY" ]]; then
@@ -146,16 +179,16 @@ if [[ "$UPGRADE" ]]; then
   fi
   echo "Self-update in progress..."
   curl -fsSL "https://raw.githubusercontent.com/krzysztof-miemiec/get-binaries/${UPGRADE}/get-binaries.sh" -o "$0"
-  chmod +x "$SELF_LOCATION"
   exit 0
 fi
 
 # Process passed binaries file if it exists
 if [[ -f "$BINARIES_FILE" ]]; then
-  while read -r name version url; do
-    gb_fetch "$name" "$version" "$PLATFORM" "$url"
+  while read -r name version url rest; do
+    params=""
+    for r in $rest; do params="$params --$r"; done
+    gb_fetch --name="$name" --version="$version" --url="$url" $params
   done <"$BINARIES_FILE"
 
   gb_summary
 fi
-
