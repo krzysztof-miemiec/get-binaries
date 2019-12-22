@@ -1,0 +1,2 @@
+terragrunt  v0.21.6 https://github.com/gruntwork-io/terragrunt/releases/download/{version}/terragrunt_{platform}_amd64
+terraform   0.12.16 https://releases.hashicorp.com/terraform/{version}/terraform_{version}_{platform}_amd64.zip
