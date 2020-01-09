@@ -41,6 +41,10 @@ echo "Global bin directory  ${GLOBAL_BIN_DIR}"
 echo "Binaries file         ${BINARIES_FILE}"
 echo "----------------------"
 
+function gb_platform() {
+  echo "$PLATFORM"
+}
+
 function gb_checksum_sha256() {
   local SHA
   if [[ "$PLATFORM" == "darwin" ]]; then
@@ -53,7 +57,8 @@ function gb_checksum_sha256() {
 
 function gb_lockfile_check() {
   local NAME=$1
-  local CHECKSUM=$2
+  local PLATFORM=$2
+  local CHECKSUM=$3
   if [[ -z "$BINARIES_FILE" ]]; then
     return 0
   fi
@@ -63,15 +68,15 @@ function gb_lockfile_check() {
     echo "Lockfile for $BINARIES_FILE has been created. Add it to your git repository."
   fi
   local locksum
-  while read -r lockname checksum; do
-    if [[ "$lockname" == "$NAME" ]]; then
+  while read -r lockname platform checksum; do
+    if [[ "$lockname" == "$NAME" && "$platform" == "$PLATFORM" ]]; then
       locksum=$checksum
       break
     fi
   done <"$LOCKFILE"
   if [[ -z "$lockname" ]]; then
     echo "${NAME} not found in lockfile. Adding..."
-    echo "${NAME} ${CHECKSUM}" >>"$LOCKFILE"
+    echo "${NAME} ${PLATFORM} ${CHECKSUM}" >>"$LOCKFILE"
     return 0
   fi
   if [[ $locksum != "$CHECKSUM" ]]; then
@@ -138,7 +143,7 @@ function gb_fetch() {
     curl -fsSL "${URL}" -o "$TMP_FILE"
     CHECKSUM=$(gb_checksum_sha256 "$TMP_FILE")
     echo "→ ${NAME}: 🧮 Got file with sha256 checksum: ${CHECKSUM}"
-    gb_lockfile_check "$NAME" "$CHECKSUM"
+    gb_lockfile_check "$NAME" "$PLATFORM" "$CHECKSUM"
     if [[ "$URL" =~ \.tar\.gz$ ]]; then
       echo "→ ${NAME}: 🗃 Unpacking..."
       tar xz -f "$TMP_FILE" -C "${BIN_DIR}"
