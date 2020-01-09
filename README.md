@@ -1,4 +1,4 @@
-# get-dependencies
+# get-binaries
 
 Small, cross-platform (macOS/Linux) binary downloader script, which can be included in projects to speed-up dev 
 environment preparation. Obviously, all developers in your project can manually manage it's dependencies, but if one's
