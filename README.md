@@ -16,7 +16,7 @@ Check [.binaries](examples/usage-with-file/.binaries) file for syntax sample. Us
 
 Platform variable replacement can be done by:
 - passing additional parameters like `--linux=lin` or `--darwin=osx` to `gb_fetch` (when you specify it manually)
-- passing additional part in `.binaries` file like `linux=lin` or `darwin-osx` (when you specify binaries in file)
+- passing additional part in `.binaries` file like `linux=lin` or `darwin=osx` (when you specify binaries in file)
 
 ## Setup
 
@@ -32,7 +32,28 @@ chmod +x get-binaries.sh
 . get-binaries.sh
 ```
 
-Then define `.binaries` file (check the example in `examples/.binaries`). Yes, you have to define download URLs yourself.
+Then define `.binaries` file. Yes, you have to define download URLs yourself like that:
+```
+kubectl     1.17.3  https://storage.googleapis.com/kubernetes-release/release/v{version}/bin/{platform}/amd64/kubectl
+kustomize   3.5.4   https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv{version}/kustomize_v{version}_{platform}_amd64.tar.gz
+vault       1.3.0   https://releases.hashicorp.com/vault/{version}/vault_{version}_{platform}_amd64.zip
+jq          1.6     https://github.com/stedolan/jq/releases/download/jq-{version}/jq-{platform}64 darwin=osx-amd
+yq          2.4.0   https://github.com/mikefarah/yq/releases/download/{version}/yq_{platform}_amd64
+skaffold    1.2.0   https://storage.googleapis.com/skaffold/releases/v{version}/skaffold-{platform}-amd64
+kubedb      0.12.0  https://github.com/kubedb/cli/releases/download/{version}/kubedb-{platform}-amd64
+helm        3.2.0   https://get.helm.sh/helm-v{version}-{platform}-amd64.tar.gz|{platform}-amd64/helm
+
+```
+
+### Breakdown of `.binaries` file structure:
+
+* Specify your binaries in `name version url <optional platform name reassignments>` format
+* Separate values by tabs or spaces
+* Don't use any quotation marks
+* Use `{version}` to replace version in url
+* Use `{platform}` to replace platform in url; by default it's `darwin` for macOS and `linux` for Linux
+* Specify platform reassignments as last arguments (see *jq* line in example above)
+* Use `|` character as a separator if you want to specify a path *inside* archive (see `helm` line in example above)
 
 ## Why it's good?
 
